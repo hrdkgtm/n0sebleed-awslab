@@ -40,7 +40,11 @@ resource "aws_subnet" "private_subnets" {
   tags = {
     Name = "${var.cluster_name}-private-subnet-${count.index + 1}"
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    "karpenter.sh/discovery" = "n0sebleed-eks"
     "kubernetes.io/role/internal-elb" = "1"
+  }
+  tags_all = {
+    "karpenter.sh/discovery" = "n0sebleed-eks"
   }
 }
 
