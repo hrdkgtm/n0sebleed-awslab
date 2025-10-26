@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload-b
+  namespace: default
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: workload-b
+  template:
+    metadata:
+      labels:
+        app: workload-b
+    spec:
+      # Toleration to allow scheduling on workload-b tainted nodes
+      tolerations:
+      - key: workload
+        value: workload-b
+        effect: NoSchedule
+        operator: Equal
+      
+      # Node affinity to prefer workload-b nodes
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: workload
+                operator: In
+                values: ["workload-b"]
+      
+      containers:
+      - name: nginx
+        image: nginx:1.21
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 150m
+            memory: 192Mi
+          limits:
+            cpu: 300m
+            memory: 384Mi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-b-service
+  namespace: default
+spec:
+  selector:
+    app: workload-b
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  type: ClusterIP

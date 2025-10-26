@@ -37,7 +37,7 @@ variable "node_group_name" {
 variable "instance_types" {
   description = "Instance types for node group"
   type        = list(string)
-  default     = ["t3.micro"]
+  default     = ["t3.small"]
 }
 
 variable "desired_capacity" {
@@ -62,4 +62,10 @@ variable "create_node_group" {
   description = "Whether to create the node group"
   type        = bool
   default     = true
+}
+
+variable "additional_admin_users" {
+  description = "List of additional IAM users to grant cluster admin access"
+  type        = list(string)
+  default     = ["gutamahardika"]
 }
