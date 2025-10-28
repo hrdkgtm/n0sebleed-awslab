@@ -43,19 +43,19 @@ variable "instance_types" {
 variable "desired_capacity" {
   description = "Desired number of nodes"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "min_size" {
   description = "Minimum number of nodes"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "max_size" {
   description = "Maximum number of nodes"
   type        = number
-  default     = 3
+  default     = 2
 }
 
 variable "create_node_group" {
