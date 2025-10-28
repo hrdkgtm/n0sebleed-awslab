@@ -47,11 +47,7 @@ metadata:
   name: default
 spec:
   # Template for nodes that Karpenter will provision
-  template:
-    metadata:
-      labels:
-        environment: test
-    
+  template:    
     spec:
       # Node class reference
       nodeClassRef:
@@ -73,6 +69,7 @@ spec:
       - key: node.kubernetes.io/instance-type
         operator: In
         values: 
+        - t3.micro
         - t3.small
       
       # Node properties

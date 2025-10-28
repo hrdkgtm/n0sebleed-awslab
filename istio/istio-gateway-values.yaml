@@ -72,7 +72,7 @@ _internal_defaults_do_not_set:
       cpu: 100m
       memory: 128Mi
     limits:
-      cpu: 2000m
+      cpu: 1000m
       memory: 1024Mi
 
   autoscaling:

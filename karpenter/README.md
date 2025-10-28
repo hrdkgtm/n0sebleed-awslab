@@ -210,6 +210,66 @@ kubectl get nodes -l workload --show-labels
 kubectl describe node <node-name>
 ```
 
+### Common Issues and Solutions
+
+#### UnfulfillableCapacity Error
+
+**Error**: `UnfulfillableCapacity: Unable to fulfill capacity due to your request configuration`
+
+**Causes**:
+- Limited instance type selection
+- Regional capacity constraints
+- Free tier limitations
+- Instance type not available in selected subnets
+
+**Solutions**:
+```bash
+# 1. Add more instance types to your nodepool
+# Edit your nodepool to include more options:
+- t3.micro
+- t3.small
+- t3.medium
+- t2.micro
+- t2.small
+- m5.large  # Add larger instances if needed
+
+# 2. Check available instance types in your region
+aws ec2 describe-instance-types --query 'InstanceTypes[?contains(InstanceType, `t3`)].[InstanceType]' --output table
+
+# 3. Check spot capacity in your region
+aws ec2 describe-spot-price-history --instance-types t3.small t3.medium --product-descriptions "Linux/UNIX" --max-items 5
+
+# 4. Verify subnet availability zones
+kubectl get nodes -o custom-columns=NAME:.metadata.name,AZ:.metadata.labels."topology\.kubernetes\.io/zone"
+```
+
+#### Free Tier Instance Type Issues
+
+**Error**: `The specified instance type is not eligible for Free Tier`
+
+**Solution**: Use Free Tier eligible instances or remove the restriction:
+```yaml
+# Free tier eligible instances
+- t2.micro   # Always free tier eligible
+- t3.micro   # Free tier eligible in most regions
+```
+
+#### Node Scheduling Issues
+
+**Error**: Pods stuck in `Pending` state
+
+```bash
+# Check pod events
+kubectl describe pod <pod-name>
+
+# Check nodepool events
+kubectl describe nodepool <nodepool-name>
+
+# Verify tolerations and affinity
+kubectl get pod <pod-name> -o yaml | grep -A 10 tolerations
+kubectl get pod <pod-name> -o yaml | grep -A 20 affinity
+```
+
 ### Useful Commands
 
 ```bash
@@ -222,6 +282,10 @@ kubectl get events --sort-by='.lastTimestamp'
 
 # Check Karpenter events
 kubectl get events -n kube-system --field-selector involvedObject.name=karpenter
+
+# Debug instance availability
+aws ec2 describe-availability-zones --query 'AvailabilityZones[].ZoneName'
+aws ec2 describe-subnets --filters Name=tag:karpenter.sh/discovery,Values=n0sebleed-eks
 ```
 
 ## Cleanup
